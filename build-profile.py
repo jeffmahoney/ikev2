@@ -222,12 +222,6 @@ def check_dhgroup(alg):
     return False
 
 if __name__ == '__main__':
-    epilog = """
-PKCS12 certificates can be generated using openssl:
-    Assuming certificate.pem contains both the certificate and a private key,
-    % openssl pkcs12 -export -in certficate.pem -out certificate.p12
-    """
-
     parser = argparse.ArgumentParser(epilog=epilog)
     parser.add_argument('-o', '--outfile', help="Filename for output plist. Defaults to stdout.")
     parser.add_argument('-n', '--vpn-name', help="Friendly name for VPN connection")
@@ -235,7 +229,7 @@ PKCS12 certificates can be generated using openssl:
     parser.add_argument('-e', '--vpn-endpoint', help="VPN Endpoint", required=True)
     parser.add_argument('-i', '--remote-identifier', help="Remote identifier (defaults to vpn endpoint")
     parser.add_argument('-C', '--ca-certificate', help="CA Certificate in PEM format")
-    parser.add_argument('-c', '--certificate', help="Certificate and key in PKCS12 format", required=True)
+    parser.add_argument('-c', '--certificate', help="Certificate and key in PEM format (single file)", required=True)
     parser.add_argument('-L', '--local-identifier', help="Local identifier (defaults to Certificate CN)")
     parser.add_argument('-E', '--encryption', help="Encryption Algorithm")
     parser.add_argument('-I', '--integrity', help="Integrity Algorithm")
