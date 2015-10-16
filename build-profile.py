@@ -63,12 +63,12 @@ class MobileProfile:
         self.CACertificateData = None
         self.CertificateData = None
         self.VPNEndpoint = endpoint
-        self.PayloadIdentifier = ".".join(reversed(endpoint.split("."))) + ".vpn1"
+        self.PayloadIdentifier = self.payload_identifier()
         self.RemoteIdentifier = endpoint
         self.VPNName = "VPN to %s" % endpoint
         self.ProfileName = "%s IKEv2 Profile" % endpoint
         self.ConfigName = "%s IKEv2 Config 1" % endpoint
-        self.LocalIdentifier = 'jeffm-iphone@jeffm.io'
+        self.LocalIdentifier = None
 
         self.CertificateUUID = str(uuid.uuid4())
         self.CACertificateUUID = str(uuid.uuid4()).upper()
@@ -123,7 +123,7 @@ class MobileProfile:
         self.CACertificateData = certcontents
 
     def payload_identifier(self):
-        return ".".join(reversed("vpn.jeffm.io".split("."))) + ".vpn1"
+        return ".".join(reversed(self.VPNEndpoint.split("."))) + ".vpn1"
 
     def set_profile_name(self, profile):
         self.ProfileName = "%s Profile" % profile
