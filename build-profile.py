@@ -222,7 +222,7 @@ def check_dhgroup(alg):
     return False
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(epilog=epilog)
+    parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--outfile', help="Filename for output plist. Defaults to stdout.")
     parser.add_argument('-n', '--vpn-name', help="Friendly name for VPN connection")
     parser.add_argument('-N', '--profile-name', help="Friendly name for Profile, without \"Profile\" suffix")
