@@ -191,7 +191,7 @@ def check_dhgroup(alg):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--list', action="store_true", default=False, help="List VPN encryption configurations")
-    parser.add_argument('-f', '--file', help="XML-format plist file")
+    parser.add_argument('-f', '--file', help="XML-format plist file", default=None)
     parser.add_argument("config_name", type=str, nargs='?', help="Configuration to modify", default=None)
     parser.add_argument('-E', '--encryption', help="Encryption Algorithm")
     parser.add_argument('-I', '--integrity', help="Integrity Algorithm")
@@ -238,7 +238,12 @@ if __name__ == '__main__':
     if not check_dhgroup(options.child_dhgroup):
         missing_options = True
 
-    netconfig = NetworkConfigurationPlist("plist.xml")
+    if options.file is None:
+        print >>sys.stderr, "XML-format plist required."
+        print >>sys.stderr, "`defaults export /Library/Preferences/com.apple.networkextension.plist -'\nwill export your network configuration."
+        sys.exit(1)
+
+    netconfig = NetworkConfigurationPlist(options.file)
 
     if options.list:
         for config in netconfig.list_configs():
@@ -255,10 +260,6 @@ if __name__ == '__main__':
             print "  DH Group:\t%s" % params['child']['DiffieHellmanGroup'] 
             print ""
         sys.exit(0)
-
-    if not options.file:
-        print >>sys.stderr, "XML-format plist required."
-        sys.exit(1)
 
     if not options.config_name:
         print >>sys.stderr, "Configuration name required."
