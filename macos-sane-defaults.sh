@@ -24,4 +24,4 @@ echo "The new plist can only be imported by the superuser.  The following comman
 set -x
 sudo -k defaults import $FILE - < plist.xml
 set +x
-echo "In order to active the new settings, you'll need to direct the GUI to 'Apply'. The simplest way to do that is to change one of the main text fields temporarily and click 'Apply.'" | fmt -w 74
+echo "In order to activate the new settings, you'll need to direct the GUI to 'Apply'. The simplest way to do that is to change one of the main text fields temporarily and click 'Apply.'" | fmt -w 74
