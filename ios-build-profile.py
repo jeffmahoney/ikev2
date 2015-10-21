@@ -87,7 +87,6 @@ class MobileProfile:
             'IntegrityAlgorithm' : DEFAULT_INTEGRITY_ALGORITHM,
             'DiffieHellmanGroup' : DEFAULT_DH_GROUP,
         }
-        self.CACertificateData = None
         self.CertificateData = None
         self.VPNEndpoint = endpoint
         self.PayloadIdentifier = self.payload_identifier()
@@ -98,10 +97,10 @@ class MobileProfile:
         self.LocalIdentifier = None
 
         self.CertificateUUID = str(uuid.uuid4())
-        self.CACertificateUUID = str(uuid.uuid4()).upper()
         self.Config1UUID = str(uuid.uuid4()).upper()
         self.ConfigurationUUID = str(uuid.uuid4()).upper()
 
+        self.CACertificateData = []
         self.load_ca_certificate(cacertificate)
         self.load_certificate(certificate)
 
@@ -146,8 +145,11 @@ class MobileProfile:
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM,
                                                certcontents)
 
-        self.CACertificateCN = cert.get_subject().commonName
-        self.CACertificateData = certcontents
+        self.CACertificateData.append({
+            'data' : certcontents,
+            'cn'   : cert.get_subject().commonName,
+            'uuid' : str(uuid.uuid4()).upper()
+        })
 
     def payload_identifier(self):
         return ".".join(reversed(self.VPNEndpoint.split("."))) + ".vpn1"
@@ -202,16 +204,16 @@ class MobileProfile:
             'PayloadVersion' : 1,
         }
 
-        if self.CACertificateData:
+        for ca in self.CACertificateData:
             ca_dict = {
-                'PayloadContent' : plistlib.Data(self.CACertificateData),
+                'PayloadContent' : plistlib.Data(ca['data']),
                 'PayloadDisplayName' :
-                    "%s (CA Certificate)" % self.CACertificateCN,
+                    "%s (CA Certificate)" % ca['cn'],
                 'PayloadIdentifier' :
-                    "com.apple.security.root.%s" % self.CACertificateUUID,
+                    "com.apple.security.root.%s" % ca['uuid'],
                 'PayloadType' :
                     "com.apple.security.root",
-                'PayloadUUID' : self.CACertificateUUID,
+                'PayloadUUID' : ca['uuid'],
                 'PayloadVersion' : 1,
             }
             x['PayloadContent'].insert(0, ca_dict)
@@ -255,7 +257,7 @@ if __name__ == '__main__':
     parser.add_argument('-N', '--profile-name', help="Friendly name for Profile, without \"Profile\" suffix")
     parser.add_argument('-e', '--vpn-endpoint', help="VPN Endpoint", required=True)
     parser.add_argument('-i', '--remote-identifier', help="Remote identifier (defaults to vpn endpoint")
-    parser.add_argument('-C', '--ca-certificate', help="CA Certificate in PEM format")
+    parser.add_argument('-C', '--ca-certificate', help="CA Certificate in PEM format", action='append')
     parser.add_argument('-c', '--certificate', help="Certificate and key in PEM format (single file)", required=True)
     parser.add_argument('-L', '--local-identifier', help="Local identifier (defaults to Certificate CN)")
     parser.add_argument('-E', '--encryption', help="Encryption Algorithm")
@@ -344,7 +346,8 @@ if __name__ == '__main__':
         profile.set_profile_name(options.profile_name)
 
     if options.ca_certificate:
-        profile.load_ca_certificate(options.ca_certificate)
+        for ca in options.ca_certificate:
+            profile.load_ca_certificate(ca)
 
     outfile = sys.stdout
     if options.outfile:
