@@ -11,7 +11,7 @@ while getting IKEv2 with strong encryption working on various platforms.
   configuration to use more secure defaults: AES-256, SHA2-256, modp2048.
 
 These scripts are probably helpful when generating many profiles.  For a few
-profiles, you can use the Apple Configurator tool from the App Store.
+profiles, you can use the [Apple Configurator](https://itunes.apple.com/us/app/apple-configurator-2/id1037126344?mt=12) tool from the App Store.
 
 From there, you'll need to add your device certificate (in PKCS12 form) and
 any CA Certificates (in DER form).  The scripts allow PEM format CA
@@ -22,9 +22,7 @@ as another certificate payload within the same configuration profile or
 loaded onto the device by some other means.
 
 This command:
-openssl x509 -in <cacert.pem> -outform DER -out <cacert.cer>
-
-... will convert from PEM to DER.
+<code>openssl x509 -in &lt;cacert.pem&gt; -outform DER -out &lt;cacert.cer&gt;</code> will convert from PEM to DER.
 
 Although Apple Configurator claims to only offer support for mobile devices,
 the version I tested (2.0 3A291) generates profiles that OS X can read as
