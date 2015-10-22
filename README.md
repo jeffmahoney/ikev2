@@ -1,8 +1,8 @@
 This is a collection of tools, config files, and notes I've developed
 while getting IKEv2 with strong encryption working on various platforms.
 
-- ios-build-profile.py: Builds a .mobileconfig profile to be imported by
-  Apple devices running iOS.
+- build-mobileconfig.py: Builds a .mobileconfig profile to be imported by
+  Apple devices running iOS or OS X.
 
 - macos-networkextensiontool.py: Modifies an existing IKEv2 VPN to use
   more secure encryption and integrity algorithms and Diffie Hellman groups.
