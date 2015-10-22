@@ -95,6 +95,7 @@ class MobileProfile:
         self.ProfileName = "%s IKEv2 Profile" % endpoint
         self.ConfigName = "%s IKEv2 Config 1" % endpoint
         self.LocalIdentifier = None
+        self.WifiSSID = None
 
         self.CertificateUUID = str(uuid.uuid4())
         self.Config1UUID = str(uuid.uuid4()).upper()
@@ -171,6 +172,10 @@ class MobileProfile:
         self.ProfileName = "%s Profile" % profile
         self.ConfigName = "%s Config 1" % profile
 
+    def set_wifi_ssid(self, ssid, hidden):
+        self.WifiSSID = ssid
+        self.WifiHidden = hidden
+
     def __str__(self):
         localID = self.LocalIdentifier
         if not localID:
@@ -234,6 +239,32 @@ class MobileProfile:
             }
             x['PayloadContent'].insert(0, ca_dict)
 
+        if self.WifiSSID:
+            wifi = {
+                'AutoJoin' : True,
+                'EAPClientConfiguration' :
+                    {
+                        'AcceptEAPTypes' : [13],
+                    },
+                'EncryptionType' : 'WPA2',
+                'HIDDEN_NETWORK' : self.WifiHidden,
+                'IsHotspot' : False,
+                'PayloadCertificateUUID' : self.CertificateUUID,
+                'Payload Description' : 'Configures Wi-Fi settings',
+                'PayloadDisplayName' : 'WiFi',
+                'PayloadIdentifier' :
+                    "com.apple.wifi.managed.%s" % str(uuid.uuid4()),
+                'PayloadType' :
+                    "com.apple.wifi.managed",
+                'PayloadUUID' : str(uuid.uuid4()),
+                'PayloadVersion' : 1,
+                'ProxyType' : 'None',
+                'SSID_STR' : self.WifiSSID,
+                'ServiceProviderRoamingEnabled' : False,
+                '_UsingHotspot20' : False,
+            }
+            x['PayloadContent'].append(wifi)
+
         return plistlib.writePlistToString(x)
 
 def check_encryption(alg):
@@ -288,6 +319,7 @@ if __name__ == '__main__':
     parser.add_argument("--list-encryption", action="store_true", default=False, help="List supported encryption algorithms")
     parser.add_argument("--list-integrity", action="store_true", default=False, help="List supported integrity algorithms")
     parser.add_argument("--list-dhgroups", action="store_true", default=False, help="List supported Diffie-Hellman groups")
+    parser.add_argument("--with-wifi", help="WiFi Network to connect using WPA2/Enterprise and the certificate used for IKEv2")
 
     options = parser.parse_args()
 
@@ -364,6 +396,9 @@ if __name__ == '__main__':
     if options.ca_certificate:
         for ca in options.ca_certificate:
             profile.load_ca_certificate(ca)
+
+    if options.with_wifi:
+        profile.set_wifi_ssid(options.with_wifi, False)
 
     outfile = sys.stdout
     if options.outfile:
