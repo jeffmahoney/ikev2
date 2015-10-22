@@ -100,6 +100,7 @@ class MobileProfile:
         self.Config1UUID = str(uuid.uuid4()).upper()
         self.ConfigurationUUID = str(uuid.uuid4()).upper()
 
+        self.passwordInProfile = None
         self.CACertificateData = []
         self.load_ca_certificate(cacertificate)
         self.load_certificate(certificate)
@@ -113,12 +114,24 @@ class MobileProfile:
         if isinstance(certificate, file):
             certcontents = certificate.read()
 
-        password = getpass.getpass("Password for Key:")
-
         cert = OpenSSL.crypto.load_certificate(OpenSSL.SSL.FILETYPE_PEM,
                                                certcontents)
-        key = OpenSSL.crypto.load_privatekey(OpenSSL.SSL.FILETYPE_PEM,
-                                             certcontents, password)
+        password = ""
+        key = None
+        try:
+            key = OpenSSL.crypto.load_privatekey(OpenSSL.SSL.FILETYPE_PEM,
+                                                 certcontents, password)
+        except OpenSSL.crypto.Error, e:
+            if e.args[0][0][2] != "bad password read":
+                raise
+
+        if key is None:
+            password = getpass.getpass("Password for Key:")
+            key = OpenSSL.crypto.load_privatekey(OpenSSL.SSL.FILETYPE_PEM,
+                                                 certcontents, password)
+        else:
+            password = "---empty-password---"
+            self.passwordInProfile = password
 
         pkcs12 = OpenSSL.crypto.PKCS12()
         pkcs12.set_certificate(cert)
@@ -203,6 +216,9 @@ class MobileProfile:
             'PayloadUUID' : self.ConfigurationUUID,
             'PayloadVersion' : 1,
         }
+
+        if self.passwordInProfile:
+            x['PayloadContent'][0]['Password'] = self.passwordInProfile
 
         for ca in self.CACertificateData:
             ca_dict = {
