@@ -281,7 +281,7 @@ def check_integrity(alg):
     if alg is None:
         return True
         
-    if alg in EncryptionAlgorithms:
+    if alg in IntegrityAlgorithms:
         return True
 
     print >>sys.stderr, "Error: `%s' is not a valid integrity algorithm" % alg
